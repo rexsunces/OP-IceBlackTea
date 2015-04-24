@@ -105,7 +105,7 @@ var IBT = {
 
     resultNextPageNumber: 1,
 
-    game3Data: [1, 2, 3, 4, 5, 6, 7, 8, 1, 7, 4, 5, 8, 3, 2, 6],
+    game3Data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 
     game3LastId: 0,
 
@@ -312,8 +312,22 @@ $(function () {
     //游戏三
     $(".page-5 .start").singleTap(function () {
         $('#clickaudio')[0].play();
+
+        //随机生成顺序
+        for (var i = 1; i <= 8; i++) {
+            var r = Math.floor(Math.random() * 16);
+            while (IBT.game3Data[r]) {
+                r = Math.floor(Math.random() * 16);
+            }
+            IBT.game3Data[r] = i;
+            while (IBT.game3Data[r]) {
+                r = Math.floor(Math.random() * 16);
+            }
+            IBT.game3Data[r] = i;
+        }
+
         IBT.pageMove(IBT.effects.fade, 6);
-        startGame3Timer();
+
         var totalWidth = HAOest.browser.screen.width;
         var blocksWidth = totalWidth * 95 / 100;
         var left = (totalWidth * 5 / 100 - 4) / 2;
@@ -360,10 +374,13 @@ $(function () {
         }
 
         $(".page-6 .block").singleTap(function (e) {
+            if (IBT.game3end) {
+                startGame3Timer();
+            }
             var id = e.target.id.replace(/block-/, "");
             IBT.game3FlipCard(id);
             if (IBT.game3LastId != 0) {
-                if (IBT.game3Data[id - 1] == IBT.game3Data[IBT.game3LastId - 1]) {
+                if (IBT.game3Data[id - 1] == IBT.game3Data[IBT.game3LastId - 1] && id != IBT.game3LastId) {
                     IBT.game3OutCount += 2;
                     console.log(IBT.game3OutCount);
                     $("#block-" + id).addClass("out");
@@ -395,7 +412,8 @@ $(function () {
                 else {
                     setTimeout(function () {
                         IBT.game3FlipCard(IBT.game3LastId);
-                        IBT.game3LastId = id;
+                        IBT.game3FlipCard(id);
+                        IBT.game3LastId = 0;
                     }, 1000);
                 }
             }
